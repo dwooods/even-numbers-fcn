@@ -127,6 +127,10 @@ Verified on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Linux) and 3.15.2 (macOS, App
 ## Known limits
 
 - Nested lists are not flattened.
+- PyTorch tensors are not supported. A 1-D tensor iterates 0-D tensors, which
+  are not Python number types, so `get_even_numbers(torch.tensor([1, 2, 3, 4]))`
+  returns `[]`. Convert first: `get_even_numbers(t.tolist())`. The same applies
+  to any library whose elements are 0-D array objects rather than numbers.
 - Memory is O(k) for the k evens returned, because the result is a fully
   built `list`. Nothing is indexed, so nothing can go out of bounds. The one
   way to exhaust memory is an unbounded generator of evens: with a 1 GiB cap
