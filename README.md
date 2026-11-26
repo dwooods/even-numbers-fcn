@@ -12,7 +12,7 @@ number. Standard library only; Python 3.9+.
 
 ## Run it
 
-Set up once (only needed for the 6 NumPy tests):
+Set up once (only needed for the 7 NumPy tests):
 
 ```bash
 python3 -m venv .venv
@@ -25,7 +25,7 @@ Validate:
 ```bash
 python --version                     # 3.9 or later
 python even_numbers.py               # demo
-python -m unittest -v                # 53 tests: unit, doctests, stress, fuzz (~3 s)
+python -m unittest -v                # 55 tests: unit, doctests, stress, fuzz (~3 s)
 python -m unittest -v test_even_numbers          # core rules + doctests only
 python -m unittest -v test_even_numbers_stress   # stress, NumPy and fuzz only
 python -m doctest -v even_numbers.py # docstring examples only
@@ -40,8 +40,8 @@ ruff format --check .
 mypy
 ```
 
-`python -m unittest -v` should end with `Ran 53 tests` and `OK`. Without NumPy
-it ends with `OK (skipped=6)`, which is also a pass.
+`python -m unittest -v` should end with `Ran 55 tests` and `OK`. Without NumPy
+it ends with `OK (skipped=7)`, which is also a pass.
 
 ## Behavior
 
@@ -115,7 +115,7 @@ call rather than already existing in an input list.
   self-referential nesting, generator failures, rejected containers, NumPy,
   and a seeded fuzz test against an independent reference implementation.
 
-Verified on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Linux) and 3.15.2 (macOS, Apple Silicon, with NumPy 2.5.5: all 53 tests pass, none skipped).
+Verified on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Linux) and 3.15.2 (macOS, Apple Silicon, with NumPy 2.5.5).
 
 ## Known limits
 

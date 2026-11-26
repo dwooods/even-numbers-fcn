@@ -123,6 +123,11 @@ class TestHugeNumbers(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertIs(result[0], even)
 
+    def test_two_to_the_64(self):
+        # Just past the 64-bit range where many languages overflow.
+        data = [2**64, 2**64 + 1, -(2**64), 2**63 - 1]
+        self.assertEqual(get_even_numbers(data), [2**64, -(2**64)])
+
     def test_float_extremes(self):
         self.assertEqual(get_even_numbers([1e308, -1e308]), [1e308, -1e308])
         self.assertEqual(get_even_numbers([5e-324]), [])  # subnormal, not whole
@@ -231,6 +236,12 @@ class TestOtherNumberTypes(unittest.TestCase):
     def test_numpy_float_array_with_nan_and_inf(self):
         arr = np.array([2.0, np.nan, np.inf, -np.inf, 3.0, 4.0])
         self.assertEqual([float(v) for v in get_even_numbers(arr)], [2.0, 4.0])
+
+    @unittest.skipIf(np is None, "NumPy not installed")
+    def test_numpy_fractional_floats_are_skipped(self):
+        arr = np.array([2.0, 4.5, -2.5, 6.0, -8.0])
+        self.assertEqual([float(v) for v in get_even_numbers(arr)], [2.0, 6.0, -8.0])
+        self.assertEqual(get_even_numbers([np.float32(4.5), np.float32(4.0)]), [4.0])
 
     @unittest.skipIf(np is None, "NumPy not installed")
     def test_numpy_bool_array_is_skipped_like_python_bool(self):
