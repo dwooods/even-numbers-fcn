@@ -52,8 +52,9 @@ def get_even_numbers(items: Iterable[Any]) -> List[Any]:
         The even numbers, as the same objects that were in the input.
 
     Raises:
-        TypeError: If ``items`` is not iterable, or is a str, bytes-like
-            object or mapping.
+        TypeError: If ``items`` is not iterable, is a str, bytes-like
+            object or mapping, or is multi-dimensional (``ndim != 1``),
+            such as a 2-D NumPy array or a pandas DataFrame.
 
     Examples:
         >>> get_even_numbers([1, 2, 3, 4, -6, 0, 8.0, 9.5, "10", None, True])
@@ -67,6 +68,11 @@ def get_even_numbers(items: Iterable[Any]) -> List[Any]:
     error = f"expected an array of values, got {type(items).__name__}"
     if isinstance(items, _REJECTED_CONTAINERS):
         raise TypeError(error)
+    # A 2-D NumPy array iterates rows and a pandas DataFrame iterates column
+    # labels, not values. Duck-typed on `ndim`, so neither library is imported.
+    ndim = getattr(items, "ndim", 1)
+    if ndim != 1:
+        raise TypeError(f"expected a 1-D array of values, got {ndim}-D")
     try:
         iterator = iter(items)
     except TypeError:

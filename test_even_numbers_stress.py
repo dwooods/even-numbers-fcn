@@ -24,6 +24,11 @@ try:
 except ImportError:  # NumPy is optional; those tests are skipped without it.
     np = None
 
+try:
+    import pandas as pd
+except ImportError:  # pandas is optional; that test is skipped without it.
+    pd = None
+
 
 def reference_even_numbers(items):
     """Independent, deliberately plain implementation to compare against.
@@ -203,6 +208,17 @@ class TestRejectedContainers(unittest.TestCase):
         with self.assertRaises(TypeError):
             get_even_numbers(MyStr("2468"))
 
+    def test_any_multidimensional_object_is_rejected(self):
+        # Duck-typed check, so it works without NumPy or pandas installed.
+        class Grid:
+            ndim = 2
+
+            def __iter__(self):
+                return iter([[2, 4], [6, 8]])
+
+        with self.assertRaises(TypeError):
+            get_even_numbers(Grid())
+
     def test_other_non_iterables_raise(self):
         for bad in (None, 42, 4.0, True, object()):
             with self.subTest(bad=type(bad).__name__), self.assertRaises(TypeError):
@@ -248,8 +264,20 @@ class TestOtherNumberTypes(unittest.TestCase):
         self.assertEqual(get_even_numbers(np.array([True, False])), [])
 
     @unittest.skipIf(np is None, "NumPy not installed")
-    def test_numpy_2d_array_rows_are_skipped_not_flattened(self):
-        self.assertEqual(get_even_numbers(np.array([[2, 4], [6, 8]])), [])
+    def test_numpy_multidimensional_arrays_are_rejected(self):
+        # Iterating a 2-D array yields rows, so it used to return [] silently.
+        for arr in (np.array([[2, 4], [6, 8]]), np.zeros((2, 2, 2)), np.array(4)):
+            with self.subTest(ndim=arr.ndim), self.assertRaises(TypeError):
+                get_even_numbers(arr)
+
+    @unittest.skipIf(pd is None, "pandas not installed")
+    def test_pandas_dataframe_is_rejected_series_is_accepted(self):
+        # Iterating a DataFrame yields column labels: {2: ..., 3: ...} gave [2].
+        with self.assertRaises(TypeError):
+            get_even_numbers(pd.DataFrame({2: [1, 3], 3: [2, 4]}))
+        self.assertEqual(
+            [int(v) for v in get_even_numbers(pd.Series([2, 3, 4]))], [2, 4]
+        )
 
     @unittest.skipIf(np is None, "NumPy not installed")
     def test_large_numpy_array(self):

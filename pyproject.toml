@@ -9,7 +9,7 @@ requires-python = ">=3.9"
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["ruff", "mypy", "numpy"]  # numpy only enables the optional NumPy tests
+dev = ["ruff", "mypy", "numpy", "pandas"]  # numpy/pandas only enable optional tests
 
 [tool.ruff]
 line-length = 88

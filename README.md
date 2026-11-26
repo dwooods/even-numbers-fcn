@@ -12,12 +12,12 @@ number. Standard library only; Python 3.9+.
 
 ## Run it
 
-Set up once (only needed for the 7 NumPy tests):
+Set up once (only needed for the 8 NumPy and pandas tests):
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install numpy
+python -m pip install numpy pandas
 ```
 
 Validate:
@@ -25,7 +25,7 @@ Validate:
 ```bash
 python --version                     # 3.9 or later
 python even_numbers.py               # demo
-python -m unittest -v                # 55 tests: unit, doctests, stress, fuzz (~3 s)
+python -m unittest -v                # 57 tests: unit, doctests, stress, fuzz (~3 s)
 python -m unittest -v test_even_numbers          # core rules + doctests only
 python -m unittest -v test_even_numbers_stress   # stress, NumPy and fuzz only
 python -m doctest -v even_numbers.py # docstring examples only
@@ -40,8 +40,8 @@ ruff format --check .
 mypy
 ```
 
-`python -m unittest -v` should end with `Ran 55 tests` and `OK`. Without NumPy
-it ends with `OK (skipped=7)`, which is also a pass.
+`python -m unittest -v` should end with `Ran 57 tests` and `OK`. Without NumPy and
+pandas it ends with `OK (skipped=8)`, which is also a pass.
 
 ## Behavior
 
@@ -54,6 +54,8 @@ it ends with `OK (skipped=7)`, which is also a pass.
 | `Fraction`, `Decimal`, `complex` | skipped (scope decision) |
 | `str`, `None`, nested lists, dicts as elements | skipped, never converted |
 | Container is `None`, a number, `str`, `bytes`, `bytearray`, `memoryview` or a `dict` | `TypeError` |
+| Container is multi-dimensional (`ndim != 1`): a 2-D NumPy array, a pandas DataFrame | `TypeError` |
+| A pandas Series or 1-D NumPy array | accepted |
 
 Two kinds of bad input are handled differently on purpose. A wrong
 **container** is a caller bug and fails loudly. A bad **element** is treated
@@ -68,6 +70,11 @@ as messy data and is skipped.
 - **Reject bytes-like containers and mappings.** Found by adversarial testing:
   `bytearray(b"24")` used to return `[50, 52]` (byte values) and a `dict`
   returned its keys.
+- **Reject multi-dimensional containers.** Found by an outside review
+  (Gemini): a 2-D NumPy array iterates rows, so it returned `[]`, and a
+  pandas DataFrame iterates column labels, so `{2: ..., 3: ...}` returned
+  `[2]`. One duck-typed check on `ndim` rejects both, without importing
+  either library.
 - **Support NumPy without importing it.** Found by testing: `np.int64` is not
   a Python `int`, so a plain `isinstance(v, int)` silently returned `[]` for
   `np.array([1, 2, 3, 4])`. The check now uses the `numbers.Integral` ABC.
@@ -112,8 +119,8 @@ call rather than already existing in an input list.
   examples (doctests).
 - `test_even_numbers_stress.py`: 1M and 10M element inputs, 100,000-digit
   integers, float extremes (`-0.0`, `2**53 + 1`, subnormals), deep and
-  self-referential nesting, generator failures, rejected containers, NumPy,
-  and a seeded fuzz test against an independent reference implementation.
+  self-referential nesting, generator failures, rejected containers
+  (including multi-dimensional ones), NumPy, pandas, and a seeded fuzz test against an independent reference implementation.
 
 Verified on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Linux) and 3.15.2 (macOS, Apple Silicon, with NumPy 2.5.5).
 
@@ -126,6 +133,16 @@ Verified on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Linux) and 3.15.2 (macOS, App
   it raised `MemoryError` after about 2 seconds. An unbounded generator of odd
   numbers uses flat memory but never returns. If that mattered, a streaming
   version that yields evens one at a time would use constant memory.
+
+## Further reading
+
+- [`unittest`](https://docs.python.org/3/library/unittest.html) and
+  [`doctest`](https://docs.python.org/3/library/doctest.html): the test
+  frameworks used here
+- [`numbers`](https://docs.python.org/3/library/numbers.html): the
+  `Integral` / `Real` / `Rational` abstract base classes behind the type checks
+- [`numpy.ndarray.ndim`](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.ndim.html):
+  the attribute the multi-dimensional check relies on
 
 ## How this was built
 
