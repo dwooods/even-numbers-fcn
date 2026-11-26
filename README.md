@@ -70,8 +70,8 @@ as messy data and is skipped.
 - **Reject bytes-like containers and mappings.** Found by adversarial testing:
   `bytearray(b"24")` used to return `[50, 52]` (byte values) and a `dict`
   returned its keys.
-- **Reject multi-dimensional containers.** Found by an outside review
-  (Gemini): a 2-D NumPy array iterates rows, so it returned `[]`, and a
+- **Reject multi-dimensional containers.** Found by a second review pass:
+  a 2-D NumPy array iterates rows, so it returned `[]`, and a
   pandas DataFrame iterates column labels, so `{2: ..., 3: ...}` returned
   `[2]`. One duck-typed check on `ndim` rejects both, without importing
   either library.
