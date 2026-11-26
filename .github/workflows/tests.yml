@@ -1,0 +1,30 @@
+# Runs lint, type checks and the full test suite on every push and pull
+# request, across the supported Python versions, with and without NumPy.
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        numpy: [false, true]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dev tools
+        run: pip install ruff mypy
+      - name: Install NumPy (optional dependency)
+        if: matrix.numpy
+        run: pip install numpy
+      - name: Lint
+        run: ruff check . && ruff format --check .
+      - name: Type check
+        run: mypy
+      - name: Tests (unit, doctests, stress, fuzz)
+        run: python -m unittest -v

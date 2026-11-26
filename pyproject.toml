@@ -1,0 +1,33 @@
+# Tooling config only. The project has no runtime dependencies and is not
+# packaged; this file exists so linting and type checking are reproducible.
+
+[project]
+name = "even-numbers"
+version = "1.0.0"
+description = "Return the even numbers in an array, with edge cases handled."
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["ruff", "mypy", "numpy"]  # numpy only enables the optional NumPy tests
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, bugbear, isort, pyupgrade, simplify, naming, docstrings
+select = ["E", "F", "W", "B", "I", "UP", "SIM", "N", "D"]
+# typing.List / Union are kept so the module reads the same on Python 3.9.
+ignore = ["UP006", "UP007", "UP035"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+# Test names describe the behavior; a docstring per test would repeat it.
+"test_*.py" = ["D101", "D102"]
+
+[tool.mypy]
+strict = true
+files = ["even_numbers.py", "benchmark.py"]
