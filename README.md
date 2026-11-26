@@ -120,9 +120,12 @@ Verified on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Linux) and 3.15.2 (macOS, App
 ## Known limits
 
 - Nested lists are not flattened.
-- An infinite generator never returns.
-- The result is a fully built `list`; a streaming generator version would be
-  a small change if needed.
+- Memory is O(k) for the k evens returned, because the result is a fully
+  built `list`. Nothing is indexed, so nothing can go out of bounds. The one
+  way to exhaust memory is an unbounded generator of evens: with a 1 GiB cap
+  it raised `MemoryError` after about 2 seconds. An unbounded generator of odd
+  numbers uses flat memory but never returns. If that mattered, a streaming
+  version that yields evens one at a time would use constant memory.
 
 ## How this was built
 
