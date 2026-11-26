@@ -1,5 +1,7 @@
 # Runs lint, type checks and the full test suite on every push and pull
-# request, across the supported Python versions, with and without NumPy.
+# request, across supported Python versions, with and without NumPy.
+# Python 3.9 is still supported by the code (verified locally) but is no
+# longer available on GitHub's current Ubuntu runners, so CI starts at 3.10.
 name: tests
 
 on: [push, pull_request]
@@ -10,11 +12,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         numpy: [false, true]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dev tools
