@@ -1,5 +1,7 @@
 # Even numbers
 
+[![tests](https://github.com/dwooods/even-numbers-fcn/actions/workflows/tests.yml/badge.svg)](https://github.com/dwooods/even-numbers-fcn/actions/workflows/tests.yml)
+
 `get_even_numbers(items)` returns a new list of the even numbers in any
 array-like input, in input order, and skips every value that is not a real
 number. Standard library only; Python 3.9+.
@@ -122,7 +124,10 @@ call rather than already existing in an input list.
   self-referential nesting, generator failures, rejected containers
   (including multi-dimensional ones), NumPy, pandas, and a seeded fuzz test against an independent reference implementation.
 
-Verified on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Linux) and 3.15.2 (macOS, Apple Silicon, with NumPy 2.5.5).
+GitHub Actions runs lint, type checks and all tests on Python 3.10 to 3.14, with and
+without NumPy and pandas, on every push. Also verified locally on Python 3.9 (Linux)
+and 3.15.2 (macOS, Apple Silicon, with NumPy 2.5.5 and pandas 3.1.1). Python 3.9 is
+not in CI because GitHub's current Ubuntu runners no longer provide it.
 
 ## Known limits
 
@@ -150,4 +155,7 @@ Verified on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Linux) and 3.15.2 (macOS, App
 
 ## How this was built
 
-Built with Claude (Anthropic) as a coding assistant.
+Built with Claude (Anthropic) as a coding assistant. I set the rules for each
+edge case, reviewed the code and ran the tests. The bugs listed under Design
+decisions were found by adversarial testing and a second review pass, then fixed
+and covered by tests.
